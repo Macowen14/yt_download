@@ -7,7 +7,9 @@ A feature-rich, beautiful, and 403-resilient YouTube search & downloader CLI too
 ## Features ✨
 
 - 🎨 **Rich Terminal Interface**: Modern UI with status spinners, formatted search tables, metadata cards, and custom progress bars showing download speed, file size, ETA, and percentage.
-- 🛡️ **HTTP 403 Forbidden Resilience**: Built-in player-client fallback rotation (`web`, `tv`, `ios`, `mweb`, `android`) and automatic JS challenge solving to bypass YouTube bot detection.
+- 🔍 **Pre-Download Format & Type Inspection**: Automatically checks available stream types, video resolutions (1080p, 720p, etc.), and audio formats before starting downloads.
+- 🎛️ **Interactive Format Chooser (`-F` / `--choose-format`)**: View an interactive list of available formats, video/audio codecs, and file sizes to select your desired format ID before downloading.
+- 🛡️ **HTTP 403 Forbidden Resilience**: Smart client fallback rotation (`default`, `android`, `ios`, `mweb`, `tv`, `web`) to handle YouTube bot detection and SABR streaming restrictions.
 - 📁 **Smart Default Output**: Downloads automatically default to `~/Videos` (customizable via `-o` / `--output`).
 - 🔍 **Interactive Search**: Search YouTube directly and select individual videos or ranges (e.g. `1,3`, `1-4`, `all`) to download interactively.
 - ℹ️ **Video Info Inspection**: Preview title, channel, duration, view count, description, and available video/audio formats before downloading.
@@ -87,6 +89,20 @@ Download videos to default `~/Videos`:
 uv run ytfetch download "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 ```
 
+#### Interactive Format Chooser (`-F` / `--choose-format`)
+
+Interactively view available formats and choose a specific stream ID before downloading:
+
+```bash
+uv run ytfetch download "https://www.youtube.com/watch?v=dQw4w9WgXcQ" -F
+```
+
+Or during interactive search:
+
+```bash
+uv run ytfetch search "SQL injection" -i -F
+```
+
 #### Download Audio Only (`-a` / `--audio-only`)
 
 Extract high-quality audio (defaults to MP3):
@@ -121,8 +137,8 @@ uv run ytfetch download "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --cookies-
 
 | Subcommand | Description | Key Options |
 |---|---|---|
-| `search` | Search YouTube videos | `-n <num>`, `-i/--interactive`, `-a/--audio-only`, `-q <quality>`, `-o <path>` |
-| `download` | Download single/multiple URLs | `-a/--audio-only`, `--audio-format`, `-q <quality>`, `-f <format>`, `--info`, `-o <path>`, `--cookies-from-browser` |
+| `search` | Search YouTube videos | `-n <num>`, `-i/--interactive`, `-F/--choose-format`, `-a/--audio-only`, `-q <quality>`, `-o <path>` |
+| `download` | Download single/multiple URLs | `-F/--choose-format`, `-a/--audio-only`, `--audio-format`, `-q <quality>`, `-f <format>`, `--info`, `-o <path>`, `--cookies-from-browser` |
 | `info` | Inspect video details & formats | `--cookies`, `--cookies-from-browser` |
 
 ---
