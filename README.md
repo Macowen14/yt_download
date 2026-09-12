@@ -4,6 +4,9 @@ A feature-rich, beautiful, and 403-resilient YouTube search & downloader CLI too
 
 ---
 
+> [!WARNING]
+> This project is not fully tested yet. Some downloaded files may lack audio, but the largest and best available video format is usually the correct one to use because it typically contains the audio stream. If you can fix this issue, feel free to improve the project.
+
 ## Features ✨
 
 - 🎨 **Rich Terminal Interface**: Modern UI with status spinners, formatted search tables, metadata cards, and custom progress bars showing download speed, file size, ETA, and percentage.
