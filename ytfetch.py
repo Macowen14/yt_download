@@ -335,7 +335,7 @@ def inspect_and_select_format(
         )
         if user_choice.strip():
             if user_choice.strip().lower() == "best":
-                return "bestvideo*+bestaudio/best/b"
+                return "bestvideo*+bestaudio[ext=m4a]/bestvideo*+bestaudio/best/b"
             return user_choice.strip()
 
     if audio_only:
@@ -354,10 +354,10 @@ def inspect_and_select_format(
             matched_res = next((r for r in res_list if r <= target_val), res_list[-1] if res_list else None)
             res_desc = f"{matched_res}p (requested {quality})" if matched_res else quality
             console.print(f"  [dim]• Duration: {duration} | Available: {res_str} | Target: {res_desc}[/dim]")
-            return f"bestvideo[height<={target_val}]*+bestaudio/bestvideo+bestaudio/best"
+            return f"bestvideo[height<={target_val}]*+bestaudio[ext=m4a]/bestvideo[height<={target_val}]*+bestaudio/bestvideo+bestaudio/best"
 
     console.print(f"  [dim]• Duration: {duration} | Available resolutions: {res_str} | Selected format: Best ({best_res})[/dim]")
-    return "bestvideo*+bestaudio/best/b"
+    return "bestvideo*+bestaudio[ext=m4a]/bestvideo*+bestaudio/best/b"
 
 
 def _build_yt_dlp_opts(
@@ -403,15 +403,15 @@ def _build_yt_dlp_opts(
             opts["format"] = fmt_selector
         elif quality:
             q_map = {
-                "1080p": "bestvideo[height<=1080]*+bestaudio/bestvideo+bestaudio/best",
-                "720p": "bestvideo[height<=720]*+bestaudio/bestvideo+bestaudio/best",
-                "480p": "bestvideo[height<=480]*+bestaudio/bestvideo+bestaudio/best",
-                "360p": "bestvideo[height<=360]*+bestaudio/bestvideo+bestaudio/best",
-                "best": "bestvideo*+bestaudio/best/b",
+                "1080p": "bestvideo[height<=1080]*+bestaudio[ext=m4a]/bestvideo[height<=1080]*+bestaudio/best",
+                "720p": "bestvideo[height<=720]*+bestaudio[ext=m4a]/bestvideo[height<=720]*+bestaudio/best",
+                "480p": "bestvideo[height<=480]*+bestaudio[ext=m4a]/bestvideo[height<=480]*+bestaudio/best",
+                "360p": "bestvideo[height<=360]*+bestaudio[ext=m4a]/bestvideo[height<=360]*+bestaudio/best",
+                "best": "bestvideo*+bestaudio[ext=m4a]/bestvideo*+bestaudio/best/b",
             }
-            opts["format"] = q_map.get(quality.lower(), "bestvideo*+bestaudio/best/b")
+            opts["format"] = q_map.get(quality.lower(), "bestvideo*+bestaudio[ext=m4a]/bestvideo*+bestaudio/best/b")
         else:
-            opts["format"] = "bestvideo*+bestaudio/best/b"
+            opts["format"] = "bestvideo*+bestaudio[ext=m4a]/bestvideo*+bestaudio/best/b"
 
         opts["merge_output_format"] = "mp4"
 
