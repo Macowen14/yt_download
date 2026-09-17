@@ -256,6 +256,8 @@ def parse_selection_indices(selection_str: str, max_count: int) -> List[int]:
                         selected.add(idx - 1)
         elif part.isdigit():
             idx = int(part)
+            if 1 <= idx <= max_count:
+                selected.add(idx - 1)
     return sorted(list(selected))
 
 
