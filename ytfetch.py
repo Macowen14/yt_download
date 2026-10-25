@@ -43,7 +43,7 @@ try:
 except ImportError:
     sys.exit("[!] Missing dependency 'rich'. Run: uv sync or pip install -U rich")
 
-console = Console()
+console = Console(emoji=False)
 
 # Default download directory set to ~/Videos
 DEFAULT_DOWNLOAD_DIR = Path.home() / "Videos"
@@ -76,12 +76,27 @@ def _format_filesize(size_bytes: Optional[int]) -> str:
     return f"{size_bytes} B"
 
 
+def _normalize_input(value: str) -> str:
+    """Remove surrounding shell-style quotes and whitespace from user input."""
+    if value is None:
+        return value
+
+    normalized = value.strip()
+    while len(normalized) >= 2 and normalized[0] == normalized[-1] and normalized[0] in {'"', "'", "`"}:
+        normalized = normalized[1:-1].strip()
+    return normalized
+
+
 def _format_url(url_or_id: str) -> str:
     """Ensure the target string is a complete URL."""
-    if url_or_id.startswith("http://") or url_or_id.startswith("https://"):
-        return url_or_id
-    # Handle search queries or YouTube IDs
-    return f"https://www.youtube.com/watch?v={url_or_id}"
+    normalized = _normalize_input(url_or_id)
+    if not normalized:
+        return normalized
+    if normalized.startswith("http://") or normalized.startswith("https://"):
+        return normalized
+    # Handle search queries or YouTube IDs. This also tolerates Windows shell input
+    # like "'VIDEO_ID'" or '"VIDEO_ID"' without treating the quotes as part of the ID.
+    return f"https://www.youtube.com/watch?v={normalized}"
 
 
 class RichProgressHook:
@@ -150,7 +165,7 @@ def search_videos(query: str, max_results: int = 5) -> List[Dict[str, Any]]:
                         "view_count": entry.get("view_count"),
                     })
         except Exception as e:
-            console.print(f"[bold red]❌ Search failed:[/bold red] {e}")
+            console.print(f"[bold red]ERROR: Search failed:[/bold red] {e}")
             return []
 
     if not results:
@@ -205,7 +220,7 @@ def show_video_info(url_or_id: str, cookies: Optional[str] = None, cookies_from_
         f"[bold white]Description Snippet:[/bold white]\n[dim]{description}[/dim]"
     )
 
-    console.print(Panel(details_text, title="[bold magenta]🎥 Video Details[/bold magenta]", border_style="cyan", padding=(1, 2)))
+    console.print(Panel(details_text, title="[bold magenta]Video Details[/bold magenta]", border_style="cyan", padding=(1, 2)))
 
     # Formats Table
     formats = info.get("formats", [])
@@ -444,7 +459,7 @@ def download_video(
 
     if info:
         video_title = info.get("title", url)
-        console.print(f"[bold white]🎥 {video_title}[/bold white]")
+        console.print(f"[bold white]Video: {video_title}[/bold white]")
         selected_fmt = inspect_and_select_format(
             info=info,
             audio_only=audio_only,
@@ -453,7 +468,7 @@ def download_video(
             choose_format=choose_format,
         )
     else:
-        console.print("[yellow]⚠️ Could not pre-fetch video metadata. Proceeding with fallback format selection.[/yellow]")
+        console.print("[yellow]WARNING: Could not pre-fetch video metadata. Proceeding with fallback format selection.[/yellow]")
         selected_fmt = fmt_selector or "bestvideo*+bestaudio/best/b"
 
     console.print(f"[dim]Destination directory: {output_dir}[/dim]")
@@ -486,19 +501,19 @@ def download_video(
             try:
                 with yt_dlp.YoutubeDL(opts) as ydl:
                     ydl.download([url])
-                console.print(f"[bold green]✓ Download finished successfully![/bold green] Saved to: [bold underline]{output_dir}[/bold underline]\n")
+                console.print(f"[bold green]Download finished successfully![/bold green] Saved to: [bold underline]{output_dir}[/bold underline]\n")
                 return True
             except yt_dlp.utils.DownloadError as e:
                 err_str = str(e)
                 last_error = err_str
                 client_name = client if client else "default"
                 if "403" in err_str or "Forbidden" in err_str:
-                    console.print(f"[yellow]⚠️ Player client '[bold]{client_name}[/bold]' received 403 Forbidden. Attempting fallback...[/yellow]")
+                    console.print(f"[yellow]WARNING: Player client '[bold]{client_name}[/bold]' received 403 Forbidden. Attempting fallback...[/yellow]")
                     continue
                 elif "Requested format is not available" in err_str and client is not None:
                     continue
                 else:
-                    console.print(f"[bold red]❌ Download error:[/bold red] {err_str}\n")
+                    console.print(f"[bold red]Download error:[/bold red] {err_str}\n")
                     return False
 
     # Display 403 troubleshooting panel if all fallbacks failed
@@ -613,7 +628,7 @@ def main():
             show_video_info(args.url, cookies=args.cookies, cookies_from_browser=args.cookies_from_browser)
 
     except KeyboardInterrupt:
-        console.print("\n[bold red]⚠️ Operation cancelled by user.[/bold red]")
+        console.print("\n[bold red]Operation cancelled by user.[/bold red]")
         sys.exit(130)
 
 
